@@ -1,74 +1,82 @@
-import { Image, StyleSheet, Platform } from 'react-native';
+import { useState } from "react";
+import { Text, View, StyleSheet } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import CircleButton from "@/components/CircleButton";
+import ItemRow from "@/components/itemsList/ItemRow";
 
-export default function HomeScreen() {
+const itemsData = [
+  {
+    id: 1,
+    name: "Banana",
+    qty: 7,
+    qtyAlert: 3,
+  },
+  {
+    id: 2,
+    name: "Tofu",
+    qty: 2,
+    qtyAlert: 1,
+  },
+  {
+    id: 3,
+    name: "Chickpeas",
+    qty: 2,
+    qtyAlert: 1,
+  },
+  {
+    id: 4,
+    name: "Strawberry Jam",
+    qty: 1,
+    qtyAlert: 0,
+  },
+  {
+    id: 5,
+    name: "Margarine",
+    qty: 2,
+    qtyAlert: 1,
+  },
+];
+
+export default function Index() {
+  const [showAddEntry, setShowAddEntry] = useState<boolean>(true);
+  const [items, setItems] = useState(itemsData);
+
+  const showEntryForm = () => {
+    alert("Hello");
+  };
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12'
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+    <View style={styles.container}>
+      <View style={styles.entriesContainer}>
+        {items && items.map((item) => <ItemRow key={item.id} item={item} />)}
+      </View>
+      <View style={styles.addEntryContainer}>
+        <View style={styles.addEntryRow}>
+          <CircleButton onPress={showEntryForm} />
+        </View>
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  container: {
+    flex: 1,
+    backgroundColor: "#25292e",
+    color: "#ffffff",
+    alignItems: "center",
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  addEntryContainer: {
+    position: "absolute",
+    bottom: 80,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  entriesContainer: {
+    width: "100%",
+    padding: 10,
+  },
+  addEntryRow: {
+    alignItems: "center",
+    flexDirection: "row",
   },
 });
