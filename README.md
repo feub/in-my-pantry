@@ -6,6 +6,8 @@ This is an [Expo](https://expo.dev) project created with [`create-expo-app`](htt
 
 This is my first real project in **React Native** with **Expo**. Nothing big here, just a small app that allows me to learn how to develop a cross-platform mobile app with **Expo**.
 
+![in-my-pantry-screenshot](https://github.com/user-attachments/assets/80685c98-cd3c-4102-9a75-7d8411091425)
+
 ## Get started
 
 1. Install dependencies
