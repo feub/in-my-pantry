@@ -6,13 +6,16 @@ import {
   createTable,
   seedItems,
   getItems,
+  addItem,
   deleteItem,
   Item,
+  AddItem,
 } from "@/db/db-service";
 
 import CircleButton from "@/components/CircleButton";
 import ItemRow from "@/components/itemsList/ItemRow";
-import AddItemForm from "@/components/AddItemForm";
+import AddItemModal from "@/components/addItemModal/AddItemModal";
+import AddItemForm from "@/components/addItemModal/AddItemForm";
 
 const itemsData = [
   {
@@ -83,6 +86,18 @@ export default function Index() {
     );
   };
 
+  const handleAddItem = async (data: AddItem) => {
+    // alert("ADD: " + JSON.stringify(data));
+    const db = await getDBConnection();
+    const result = await addItem(db, data);
+    // alert("ADD: " + JSON.stringify(result));
+    setItems((prevItems) => [
+      ...prevItems,
+      { ...data, id: result.lastInsertRowId },
+    ]);
+    setIsModalVisible(false);
+  };
+
   const handleDelete = async (id: number) => {
     const db = await getDBConnection();
     await deleteItem(db, id);
@@ -120,9 +135,9 @@ export default function Index() {
           </View>
         </View>
       </View>
-      <AddItemForm isVisible={isModalVisible} handleClose={onModalClose}>
-        <Text>Hello</Text>
-      </AddItemForm>
+      <AddItemModal isVisible={isModalVisible} handleClose={onModalClose}>
+        <AddItemForm onSubmit={(data) => handleAddItem(data)} />
+      </AddItemModal>
     </>
   );
 }
@@ -141,7 +156,7 @@ const styles = StyleSheet.create({
   },
   addEntryContainer: {
     position: "absolute",
-    bottom: 80,
+    bottom: 20,
   },
   addEntryRow: {
     alignItems: "center",

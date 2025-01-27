@@ -11,6 +11,13 @@ export type Item = {
   qtyAlert: number;
 };
 
+export type AddItem = {
+  emoji: string;
+  name: string;
+  qty: number;
+  qtyAlert: number;
+};
+
 export const getDBConnection = async () => {
   return await SQLite.openDatabaseAsync("my-pantry.db");
 };
@@ -48,19 +55,18 @@ export const getItems = async (db: SQLiteDatabase): Promise<Item[]> => {
   }
 };
 
-export const saveItem = async (db: SQLiteDatabase, item: Item) => {
-  return db.runAsync(
-    `INSERT OR REPLACE INTO ${tableName} (emoji, value, qty, qtyAlert) VALUES (?, ?, ?, ?)`,
-    [item.emoji, item.name, item.qty, item.qtyAlert],
+export const addItem = async (db: SQLiteDatabase, item: AddItem) => {
+  const result = await db.runAsync(
+    `INSERT OR REPLACE INTO ${tableName} (emoji, name, qty, qtyAlert) VALUES (?, ?, ?, ?)`,
+    item.emoji,
+    item.name,
+    item.qty,
+    item.qtyAlert,
   );
+
+  return result;
 };
 
 export const deleteItem = async (db: SQLiteDatabase, id: number) => {
   return await db.runAsync(`DELETE from ${tableName} where id = ?`, [id]);
 };
-
-// export const deleteTable = async (db: SQLiteDatabase) => {
-//   const query = `drop table ${tableName}`;
-
-//   await db.executeSql(query);
-// };

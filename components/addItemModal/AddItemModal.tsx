@@ -7,7 +7,7 @@ type Props = PropsWithChildren<{
   handleClose: () => void;
 }>;
 
-export default function AddItemForm({
+export default function AddItemModal({
   isVisible,
   children,
   handleClose,
@@ -29,9 +29,9 @@ export default function AddItemForm({
 
 const styles = StyleSheet.create({
   modalContent: {
-    height: "25%",
+    height: "50%",
     width: "100%",
-    backgroundColor: "#25292e",
+    backgroundColor: "#f9ead1",
     borderTopRightRadius: 18,
     borderTopLeftRadius: 18,
     position: "absolute",
