@@ -1,28 +1,41 @@
 import React from "react";
 import { Text, View, StyleSheet } from "react-native";
+import ItemRowButton from "./ItemRowButton";
 
 type ItemType = {
   id: number;
+  emoji: string;
   name: string;
   qty: number;
 };
 
-function ItemRow({ item }: { item: ItemType }) {
+export default function ItemRow({
+  item,
+  onPress,
+}: {
+  item: ItemType;
+  onPress: (value: number) => void;
+}) {
   return (
     <>
       <View style={styles.entryRow}>
-        <Text style={styles.entryRowItem}>{item.name}</Text>
-        <Text style={styles.entryRowQty}>{item.qty}</Text>
+        <View style={styles.entryRowLabel}>
+          <Text style={styles.entryRowItem}>{item.emoji}</Text>
+          <Text style={styles.entryRowItem}>{item.name}</Text>
+        </View>
+        <View style={styles.entryRowActions}>
+          <ItemRowButton mode="minus" onPress={() => onPress(-1)} />
+          <Text style={styles.entryRowQty}>{item.qty}</Text>
+          <ItemRowButton mode="plus" onPress={() => onPress(+1)} />
+        </View>
       </View>
     </>
   );
 }
 
-export default ItemRow;
-
 const styles = StyleSheet.create({
   entryRow: {
-    backgroundColor: "#1b1c1b",
+    backgroundColor: "#fcf7ef",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
@@ -30,14 +43,25 @@ const styles = StyleSheet.create({
     padding: 5,
     paddingLeft: 8,
     borderRadius: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 3, // Elevation for Android
   },
   entryRowItem: {
     fontSize: 20,
-    color: "#ffffff",
+    color: "gray",
+  },
+  entryRowLabel: {
+    flexDirection: "row",
+  },
+  entryRowActions: {
+    flexDirection: "row",
   },
   entryRowQty: {
     fontSize: 20,
     fontWeight: "bold",
-    color: "#ffffff",
+    color: "gray",
   },
 });

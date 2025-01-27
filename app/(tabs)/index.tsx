@@ -1,6 +1,13 @@
-import { useState } from "react";
-import { Text, View, StyleSheet } from "react-native";
+import { useCallback, useEffect, useState } from "react";
+import { FlatList, View, Text, StyleSheet } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import {
+  getDBConnection,
+  createTable,
+  seedItems,
+  getItems,
+  Item,
+} from "@/db/db-service";
 
 import CircleButton from "@/components/CircleButton";
 import ItemRow from "@/components/itemsList/ItemRow";
@@ -8,30 +15,35 @@ import ItemRow from "@/components/itemsList/ItemRow";
 const itemsData = [
   {
     id: 1,
+    emoji: "🍌",
     name: "Banana",
     qty: 7,
     qtyAlert: 3,
   },
   {
     id: 2,
+    emoji: "◻️",
     name: "Tofu",
     qty: 2,
     qtyAlert: 1,
   },
   {
     id: 3,
+    emoji: "🫘",
     name: "Chickpeas",
     qty: 2,
     qtyAlert: 1,
   },
   {
     id: 4,
+    emoji: "🍓",
     name: "Strawberry Jam",
     qty: 1,
     qtyAlert: 0,
   },
   {
     id: 5,
+    emoji: "🧈",
     name: "Margarine",
     qty: 2,
     qtyAlert: 1,
@@ -40,7 +52,33 @@ const itemsData = [
 
 export default function Index() {
   const [showAddEntry, setShowAddEntry] = useState<boolean>(true);
-  const [items, setItems] = useState(itemsData);
+  const [items, setItems] = useState<Item[]>([]);
+
+  const loadDataCallback = useCallback(async () => {
+    try {
+      const db = await getDBConnection();
+      await createTable(db);
+      const storedItems = await getItems(db);
+      if (storedItems.length === 0) {
+        await seedItems(db);
+      }
+      setItems(storedItems);
+    } catch (error) {
+      console.error(error);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadDataCallback();
+  }, [loadDataCallback]);
+
+  const handlePress = (id: number, value: number) => {
+    setItems((prevItems) =>
+      prevItems.map((item: Item) =>
+        item.id === id ? { ...item, qty: item.qty + value } : item,
+      ),
+    );
+  };
 
   const showEntryForm = () => {
     alert("Hello");
@@ -48,9 +86,19 @@ export default function Index() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.entriesContainer}>
-        {items && items.map((item) => <ItemRow key={item.id} item={item} />)}
-      </View>
+      <Text>{items && items.length} items</Text>
+      <FlatList
+        data={items}
+        renderItem={({ item }) => (
+          <ItemRow
+            key={item.id}
+            item={item}
+            onPress={(value) => handlePress(item.id, value)}
+          />
+        )}
+        keyExtractor={(items) => items.id.toString()}
+        style={styles.entriesContainer}
+      />
       <View style={styles.addEntryContainer}>
         <View style={styles.addEntryRow}>
           <CircleButton onPress={showEntryForm} />
@@ -63,17 +111,18 @@ export default function Index() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#25292e",
-    color: "#ffffff",
+    backgroundColor: "#f9ead1",
     alignItems: "center",
-  },
-  addEntryContainer: {
-    position: "absolute",
-    bottom: 80,
+    paddingTop: 10,
   },
   entriesContainer: {
     width: "100%",
     padding: 10,
+    maxWidth: 600,
+  },
+  addEntryContainer: {
+    position: "absolute",
+    bottom: 80,
   },
   addEntryRow: {
     alignItems: "center",
