@@ -1,6 +1,7 @@
 import React from "react";
-import { Text, View, StyleSheet, Pressable } from "react-native";
+import { Text, View, StyleSheet } from "react-native";
 import ItemRowButton from "./ItemRowButton";
+import ItemRowButtonDel from "./ItemRowButtonDel";
 
 type ItemType = {
   id: number;
@@ -26,9 +27,7 @@ export default function ItemRow({
           <Text style={styles.entryRowItem}>{item.name}</Text>
         </View>
         <View style={styles.entryRowActions}>
-          <Pressable onPress={() => handleDelete(item.id)}>
-            <Text>DEL</Text>
-          </Pressable>
+          <ItemRowButtonDel onDelete={() => handleDelete(item.id)} />
           <ItemRowButton mode="minus" onPress={() => onPress(-1)} />
           <Text style={styles.entryRowQty}>{item.qty}</Text>
           <ItemRowButton mode="plus" onPress={() => onPress(+1)} />

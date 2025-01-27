@@ -87,10 +87,8 @@ export default function Index() {
   };
 
   const handleAddItem = async (data: AddItem) => {
-    // alert("ADD: " + JSON.stringify(data));
     const db = await getDBConnection();
     const result = await addItem(db, data);
-    // alert("ADD: " + JSON.stringify(result));
     setItems((prevItems) => [
       ...prevItems,
       { ...data, id: result.lastInsertRowId },
