@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { FlatList, View, Text, StyleSheet } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import {
@@ -12,6 +12,7 @@ import {
 
 import CircleButton from "@/components/CircleButton";
 import ItemRow from "@/components/itemsList/ItemRow";
+import AddItemForm from "@/components/AddItemForm";
 
 const itemsData = [
   {
@@ -53,6 +54,7 @@ const itemsData = [
 
 export default function Index() {
   const [showAddEntry, setShowAddEntry] = useState<boolean>(true);
+  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [items, setItems] = useState<Item[]>([]);
 
   const loadDataCallback = useCallback(async () => {
@@ -88,31 +90,40 @@ export default function Index() {
   };
 
   const showEntryForm = () => {
-    alert("Hello");
+    setIsModalVisible(true);
+  };
+
+  const onModalClose = () => {
+    setIsModalVisible(false);
   };
 
   return (
-    <View style={styles.container}>
-      <Text>{items && items.length} items</Text>
-      <FlatList
-        data={items}
-        renderItem={({ item }) => (
-          <ItemRow
-            key={item.id}
-            item={item}
-            onPress={(value) => handlePress(item.id, value)}
-            handleDelete={(id) => handleDelete(item.id)}
-          />
-        )}
-        keyExtractor={(items) => items.id.toString()}
-        style={styles.entriesContainer}
-      />
-      <View style={styles.addEntryContainer}>
-        <View style={styles.addEntryRow}>
-          <CircleButton onPress={showEntryForm} />
+    <>
+      <View style={styles.container}>
+        <Text>{items && items.length} items</Text>
+        <FlatList
+          data={items}
+          renderItem={({ item }) => (
+            <ItemRow
+              key={item.id}
+              item={item}
+              onPress={(value) => handlePress(item.id, value)}
+              handleDelete={(id) => handleDelete(item.id)}
+            />
+          )}
+          keyExtractor={(items) => items.id.toString()}
+          style={styles.entriesContainer}
+        />
+        <View style={styles.addEntryContainer}>
+          <View style={styles.addEntryRow}>
+            <CircleButton onPress={showEntryForm} />
+          </View>
         </View>
       </View>
-    </View>
+      <AddItemForm isVisible={isModalVisible} handleClose={onModalClose}>
+        <Text>Hello</Text>
+      </AddItemForm>
+    </>
   );
 }
 
