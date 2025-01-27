@@ -29,14 +29,12 @@ export const createTable = async (db: SQLiteDatabase) => {
 export const seedItems = async (db: SQLiteDatabase) => {
   return await db.execAsync(`
     INSERT INTO item (emoji, name, qty, qtyAlert) VALUES ('◻️', 'Tofu', 2, 1);
-    
+    INSERT INTO item (emoji, name, qty, qtyAlert) VALUES ('🫘', 'Chickpeas', 2, 1);
+    INSERT INTO item (emoji, name, qty, qtyAlert) VALUES ('🍓', 'Strawberry Jam', 1, 0);
+    INSERT INTO item (emoji, name, qty, qtyAlert) VALUES ('🧈', 'Margarine', 2, 1);
+    INSERT INTO item (emoji, name, qty, qtyAlert) VALUES ('🍌', 'Banana', 7, 3);
   `);
 };
-
-// INSERT INTO item (emoji, name, qty, qtyAlert) VALUES ('🫘', 'Chickpeas', 2, 1);
-//     INSERT INTO item (emoji, name, qty, qtyAlert) VALUES ('🍓', 'Strawberry Jam', 1, 0);
-//     INSERT INTO item (emoji, name, qty, qtyAlert) VALUES ('🧈', 'Margarine', 2, 1);
-//     INSERT INTO item (emoji, name, qty, qtyAlert) VALUES ('🍌', 'Banana', 7, 3);
 
 export const getItems = async (db: SQLiteDatabase): Promise<Item[]> => {
   try {
@@ -50,20 +48,16 @@ export const getItems = async (db: SQLiteDatabase): Promise<Item[]> => {
   }
 };
 
-// export const saveItems = async (db: SQLiteDatabase, items: Item[]) => {
-//   const insertQuery =
-//     `INSERT OR REPLACE INTO ${tableName}(emoji, value, qty, qtyAlert) values` +
-//     items
-//       .map((i) => `(${i.emoji}, '${i.name}', ${i.qty}, ${i.qtyAlert})`)
-//       .join(",");
+export const saveItem = async (db: SQLiteDatabase, item: Item) => {
+  return db.runAsync(
+    `INSERT OR REPLACE INTO ${tableName} (emoji, value, qty, qtyAlert) VALUES (?, ?, ?, ?)`,
+    [item.emoji, item.name, item.qty, item.qtyAlert],
+  );
+};
 
-//   return db.executeSql(insertQuery);
-// };
-
-// export const deleteItem = async (db: SQLiteDatabase, id: number) => {
-//   const deleteQuery = `DELETE from ${tableName} where id = ${id}`;
-//   await db.executeSql(deleteQuery);
-// };
+export const deleteItem = async (db: SQLiteDatabase, id: number) => {
+  return await db.runAsync(`DELETE from ${tableName} where id = ?`, [id]);
+};
 
 // export const deleteTable = async (db: SQLiteDatabase) => {
 //   const query = `drop table ${tableName}`;

@@ -6,6 +6,7 @@ import {
   createTable,
   seedItems,
   getItems,
+  deleteItem,
   Item,
 } from "@/db/db-service";
 
@@ -80,6 +81,12 @@ export default function Index() {
     );
   };
 
+  const handleDelete = async (id: number) => {
+    const db = await getDBConnection();
+    await deleteItem(db, id);
+    setItems((prevItems) => items.filter((item: Item) => item.id !== id));
+  };
+
   const showEntryForm = () => {
     alert("Hello");
   };
@@ -94,6 +101,7 @@ export default function Index() {
             key={item.id}
             item={item}
             onPress={(value) => handlePress(item.id, value)}
+            handleDelete={(id) => handleDelete(item.id)}
           />
         )}
         keyExtractor={(items) => items.id.toString()}
