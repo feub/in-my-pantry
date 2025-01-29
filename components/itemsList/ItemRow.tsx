@@ -48,11 +48,14 @@ const styles = StyleSheet.create({
     elevation: 3, // Elevation for Android
   },
   entryRowItem: {
-    fontSize: 20,
+    flexShrink: 1,
+    fontSize: 16,
     color: "gray",
   },
   entryRowLabel: {
-    flexDirection: "row",
+    flex: 1,
+    flexDirection: "column",
+    minWidth: 0,
   },
   entryRowActions: {
     flexDirection: "row",
