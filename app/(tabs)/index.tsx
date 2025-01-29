@@ -1,14 +1,15 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { FlatList, View, Text, StyleSheet } from "react-native";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
 import {
   getDBConnection,
   createTable,
   seedItems,
+  countItems,
   getItems,
-  addItem,
+  addNewItem,
   deleteItem,
-  Item,
+  ItemWithCategory,
+  getCategories,
   AddItem,
 } from "@/db/db-service";
 
@@ -17,57 +18,21 @@ import ItemRow from "@/components/itemsList/ItemRow";
 import AddItemModal from "@/components/addItemModal/AddItemModal";
 import AddItemForm from "@/components/addItemModal/AddItemForm";
 
-const itemsData = [
-  {
-    id: 1,
-    emoji: "🍌",
-    name: "Banana",
-    qty: 7,
-    qtyAlert: 3,
-  },
-  {
-    id: 2,
-    emoji: "◻️",
-    name: "Tofu",
-    qty: 2,
-    qtyAlert: 1,
-  },
-  {
-    id: 3,
-    emoji: "🫘",
-    name: "Chickpeas",
-    qty: 2,
-    qtyAlert: 1,
-  },
-  {
-    id: 4,
-    emoji: "🍓",
-    name: "Strawberry Jam",
-    qty: 1,
-    qtyAlert: 0,
-  },
-  {
-    id: 5,
-    emoji: "🧈",
-    name: "Margarine",
-    qty: 2,
-    qtyAlert: 1,
-  },
-];
-
 export default function Index() {
-  const [showAddEntry, setShowAddEntry] = useState<boolean>(true);
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
-  const [items, setItems] = useState<Item[]>([]);
+  const [items, setItems] = useState<ItemWithCategory[]>([]);
 
   const loadDataCallback = useCallback(async () => {
     try {
       const db = await getDBConnection();
       await createTable(db);
-      const storedItems = await getItems(db);
-      if (storedItems.length === 0) {
+      const numItems = await countItems(db);
+
+      if (numItems === 0) {
         await seedItems(db);
       }
+
+      const storedItems = await getItems(db);
       setItems(storedItems);
     } catch (error) {
       console.error(error);
@@ -80,26 +45,51 @@ export default function Index() {
 
   const handlePress = (id: number, value: number) => {
     setItems((prevItems) =>
-      prevItems.map((item: Item) =>
+      prevItems.map((item: ItemWithCategory) =>
         item.id === id ? { ...item, qty: item.qty + value } : item,
       ),
     );
   };
 
   const handleAddItem = async (data: AddItem) => {
-    const db = await getDBConnection();
-    const result = await addItem(db, data);
-    setItems((prevItems) => [
-      ...prevItems,
-      { ...data, id: result.lastInsertRowId },
-    ]);
-    setIsModalVisible(false);
+    try {
+      const db = await getDBConnection();
+      const result = await addNewItem(db, data);
+
+      if (!result.lastInsertRowId) {
+        throw new Error("Failed to insert item");
+      }
+
+      // Get the category name for the selected category_id
+      const categories = await getCategories(db);
+      const categoryName =
+        categories.find((cat) => cat.id === data.category_id)?.name || "";
+
+      setItems((prevItems) => [
+        ...prevItems,
+        {
+          ...data,
+          id: Number(result.lastInsertRowId),
+          name: data.name,
+          qty: data.qty,
+          qtyAlert: data.qtyAlert,
+          category: categoryName,
+        },
+      ]);
+      setIsModalVisible(false);
+
+      console.log(items);
+    } catch (error) {
+      console.error("Error in handleAddItem:", error);
+    }
   };
 
   const handleDelete = async (id: number) => {
     const db = await getDBConnection();
     await deleteItem(db, id);
-    setItems((prevItems) => items.filter((item: Item) => item.id !== id));
+    setItems((prevItems) =>
+      prevItems.filter((item: ItemWithCategory) => item.id !== id),
+    );
   };
 
   const showEntryForm = () => {
@@ -114,11 +104,10 @@ export default function Index() {
     <>
       <View style={styles.container}>
         <Text>{items && items.length} items</Text>
-        <FlatList
+        <FlatList<ItemWithCategory>
           data={items}
           renderItem={({ item }) => (
             <ItemRow
-              key={item.id}
               item={item}
               onPress={(value) => handlePress(item.id, value)}
               handleDelete={(id) => handleDelete(item.id)}

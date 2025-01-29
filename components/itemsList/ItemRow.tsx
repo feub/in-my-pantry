@@ -2,20 +2,14 @@ import React from "react";
 import { Text, View, StyleSheet } from "react-native";
 import ItemRowButton from "./ItemRowButton";
 import ItemRowButtonDel from "./ItemRowButtonDel";
-
-type ItemType = {
-  id: number;
-  emoji: string;
-  name: string;
-  qty: number;
-};
+import { ItemWithCategory } from "@/db/db-service";
 
 export default function ItemRow({
   item,
   onPress,
   handleDelete,
 }: {
-  item: ItemType;
+  item: ItemWithCategory;
   onPress: (value: number) => void;
   handleDelete: (id: number) => void;
 }) {
@@ -23,8 +17,8 @@ export default function ItemRow({
     <>
       <View style={styles.entryRow}>
         <View style={styles.entryRowLabel}>
-          <Text style={styles.entryRowItem}>{item.emoji}</Text>
           <Text style={styles.entryRowItem}>{item.name}</Text>
+          <Text style={{ fontSize: 10 }}>{item.category}</Text>
         </View>
         <View style={styles.entryRowActions}>
           <ItemRowButtonDel onDelete={() => handleDelete(item.id)} />
