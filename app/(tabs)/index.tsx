@@ -45,9 +45,14 @@ export default function Index() {
 
   const handlePress = (id: number, value: number) => {
     setItems((prevItems) =>
-      prevItems.map((item: ItemWithCategory) =>
-        item.id === id ? { ...item, qty: item.qty + value } : item,
-      ),
+      prevItems.map((item: ItemWithCategory) => {
+        if (item.id === id) {
+          const newQty = item.qty + value;
+          return { ...item, qty: newQty < 0 ? 0 : newQty };
+        } else {
+          return item;
+        }
+      }),
     );
   };
 
