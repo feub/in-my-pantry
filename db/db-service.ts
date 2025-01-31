@@ -35,19 +35,6 @@ export interface ItemWithCategory extends Item {
   category: string;
 }
 
-// Database functions return types
-// export interface DatabaseFunctions {
-//   getDBConnection: () => Promise<SQLiteDatabase>;
-//   createTable: (db: SQLiteDatabase) => Promise<void>;
-//   dropTable: (db: SQLiteDatabase) => Promise<void>;
-//   seedItems: (db: SQLiteDatabase) => Promise<void>;
-//   countItems: (db: SQLiteDatabase) => Promise<number>;
-//   getItems: (db: SQLiteDatabase) => Promise<ItemWithCategory[]>;
-//   addNewItem: (db: SQLiteDatabase, item: AddItem) => Promise<DBOperationResult>;
-//   deleteItem: (db: SQLiteDatabase, id: number) => Promise<DBOperationResult>;
-//   getCategories: (db: SQLiteDatabase) => Promise<Category[]>;
-// }
-
 export const getDBConnection = async () => {
   return await SQLite.openDatabaseAsync("my-pantry.db");
 };
@@ -55,8 +42,6 @@ export const getDBConnection = async () => {
 export const createTable = async (db: SQLiteDatabase) => {
   return await db.execAsync(`
     PRAGMA foreign_keys = ON; --- foreign key constraints enforced
-    -- DROP TABLE IF EXISTS ${itemTable};
-    DROP TABLE IF EXISTS ${categoryTable};
     CREATE TABLE IF NOT EXISTS ${categoryTable} (
         id INTEGER PRIMARY KEY NOT NULL,
         name TEXT NOT NULL UNIQUE
