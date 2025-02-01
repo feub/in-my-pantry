@@ -40,21 +40,35 @@ export const getDBConnection = async () => {
 };
 
 export const createTable = async (db: SQLiteDatabase) => {
-  return await db.execAsync(`
-    PRAGMA foreign_keys = ON; --- foreign key constraints enforced
-    CREATE TABLE IF NOT EXISTS ${categoryTable} (
+  try {
+    await db.withTransactionAsync(async () => {
+      // Enable foreign key support
+      await db.execAsync("PRAGMA foreign_keys = ON;");
+
+      await db.execAsync(`
+      CREATE TABLE IF NOT EXISTS ${categoryTable} (
         id INTEGER PRIMARY KEY NOT NULL,
         name TEXT NOT NULL UNIQUE
-    );
-    CREATE TABLE IF NOT EXISTS ${itemTable} (
-        id INTEGER PRIMARY KEY NOT NULL,
-        category_id INTEGER,
-        name TEXT NOT NULL UNIQUE,
-        qty INTEGER NOT NULL,
-        qtyAlert INTEGER NOT NULL,
-        FOREIGN KEY (category_id) REFERENCES ${categoryTable}(id) ON DELETE CASCADE
-    );
-  `);
+      );
+    `);
+
+      await db.execAsync(`
+        CREATE TABLE IF NOT EXISTS ${itemTable} (
+          id INTEGER PRIMARY KEY NOT NULL,
+          category_id INTEGER,
+          name TEXT NOT NULL UNIQUE,
+          qty INTEGER NOT NULL,
+          qtyAlert INTEGER NOT NULL,
+          FOREIGN KEY (category_id)
+            REFERENCES ${categoryTable}(id)
+            ON DELETE CASCADE
+        );
+      `);
+    });
+  } catch (error) {
+    console.error("Error creating tables:", error);
+    throw new Error("Failed to create database tables");
+  }
 };
 
 export const dropTable = async (db: SQLiteDatabase) => {
@@ -64,36 +78,108 @@ export const dropTable = async (db: SQLiteDatabase) => {
 };
 
 export const seedItems = async (db: SQLiteDatabase) => {
-  return await db.execAsync(`
-    INSERT INTO ${categoryTable} (name) VALUES ('Uncategorized');
-    INSERT INTO ${categoryTable} (name) VALUES ('Fruits');
-    INSERT INTO ${categoryTable} (name) VALUES ('Vegetables');
-    INSERT INTO ${categoryTable} (name) VALUES ('Legumes');
-    INSERT INTO ${categoryTable} (name) VALUES ('Cookies');
-    INSERT INTO ${categoryTable} (name) VALUES ('Oils & Butters');
-    INSERT INTO ${categoryTable} (name) VALUES ('Sweets');
-    INSERT INTO ${categoryTable} (name) VALUES ('Vegan Must Have');
-    INSERT INTO ${itemTable} (category_id, name, qty, qtyAlert) VALUES (1, '◻️ Tofu', 2, 1);
-    INSERT INTO ${itemTable} (category_id, name, qty, qtyAlert) VALUES (4, '🫘 Chickpeas', 2, 1);
-    INSERT INTO ${itemTable} (category_id, name, qty, qtyAlert) VALUES (7, '🍓 Strawberry Jam', 1, 0);
-    INSERT INTO ${itemTable} (category_id, name, qty, qtyAlert) VALUES (6, '🧈 Margarine', 2, 1);
-    INSERT INTO ${itemTable} (category_id, name, qty, qtyAlert) VALUES (2, '🍌 Bananas', 7, 3);
-    INSERT INTO ${itemTable} (category_id, name, qty, qtyAlert) VALUES (3, '🥕 Carrots', 7, 3);
-  `);
+  try {
+    await db.withTransactionAsync(async () => {
+      // Categories to seed
+      const categories = [
+        "Uncategorized",
+        "Fruits",
+        "Vegetables",
+        "Legumes",
+        "Proteins",
+        "Treats",
+        "Cleaning",
+        "Condiments",
+        "Non-dairy",
+        "Canned food",
+        "Pasta & grains",
+      ];
+
+      // Insert categories
+      for (const categoryName of categories) {
+        await db.execAsync(
+          `INSERT OR IGNORE INTO ${categoryTable} (name) VALUES ('${categoryName}');`,
+        );
+      }
+
+      // Get category IDs for our items
+      const categoryRows: { name: string; id: number }[] = await db.getAllAsync(
+        `SELECT id, name FROM ${categoryTable} WHERE name IN (${categories
+          .map((categoryName) => `'${categoryName}'`)
+          .join(",")});`,
+      );
+
+      // Create a map of category names to IDs
+      const categoryMap = new Map(
+        categoryRows.map((row) => [row.name, row.id]),
+      );
+
+      // Initial items to seed
+      const items = [
+        { name: "◻️ Tofu", category: "Proteins", qty: 2, qtyAlert: 1 },
+        { name: "🫘 Chickpeas", category: "Legumes", qty: 2, qtyAlert: 1 },
+        { name: "🍓 Strawberry Jam", category: "Treats", qty: 1, qtyAlert: 0 },
+        {
+          name: "🧈 Margarine",
+          category: "Non-dairy",
+          qty: 2,
+          qtyAlert: 1,
+        },
+        { name: "🍌 Bananas", category: "Fruits", qty: 7, qtyAlert: 3 },
+        { name: "🥕 Carrots", category: "Vegetables", qty: 7, qtyAlert: 3 },
+      ];
+
+      // Insert items safely
+      for (const item of items) {
+        const categoryId =
+          categoryMap.get(item.category) ?? categoryMap.get("Uncategorized");
+        if (categoryId === undefined) {
+          throw new Error(`Category ID for ${item.category} not found`);
+        }
+        await db.runAsync(
+          `INSERT OR IGNORE INTO ${itemTable} (category_id, name, qty, qtyAlert) VALUES (?, ?, ?, ?);`,
+          [categoryId, item.name, item.qty, item.qtyAlert],
+        );
+      }
+    });
+
+    console.log("Seeding completed successfully");
+  } catch (error) {
+    console.error("Error seeding database:", error);
+    throw error;
+  }
+  // return await db.execAsync(`
+  //   INSERT INTO ${categoryTable} (name) VALUES ('Uncategorized');
+  //   INSERT INTO ${categoryTable} (name) VALUES ('Fruits');
+  //   INSERT INTO ${categoryTable} (name) VALUES ('Vegetables');
+  //   INSERT INTO ${categoryTable} (name) VALUES ('Legumes');
+  //   INSERT INTO ${categoryTable} (name) VALUES ('Cookies');
+  //   INSERT INTO ${categoryTable} (name) VALUES ('Oils & Butters');
+  //   INSERT INTO ${categoryTable} (name) VALUES ('Sweets');
+  //   INSERT INTO ${categoryTable} (name) VALUES ('Vegan Must Have');
+  //   INSERT INTO ${itemTable} (category_id, name, qty, qtyAlert) VALUES (1, '◻️ Tofu', 2, 1);
+  //   INSERT INTO ${itemTable} (category_id, name, qty, qtyAlert) VALUES (4, '🫘 Chickpeas', 2, 1);
+  //   INSERT INTO ${itemTable} (category_id, name, qty, qtyAlert) VALUES (7, '🍓 Strawberry Jam', 1, 0);
+  //   INSERT INTO ${itemTable} (category_id, name, qty, qtyAlert) VALUES (6, '🧈 Margarine', 2, 1);
+  //   INSERT INTO ${itemTable} (category_id, name, qty, qtyAlert) VALUES (2, '🍌 Bananas', 7, 3);
+  //   INSERT INTO ${itemTable} (category_id, name, qty, qtyAlert) VALUES (3, '🥕 Carrots', 7, 3);
+  // `);
 };
 
 export const countItems = async (db: SQLiteDatabase): Promise<number> => {
   try {
-    const result = await db.getFirstAsync<{ numItems: number }>(
-      `SELECT COUNT(id) AS numItems FROM ${itemTable}`,
-    );
-    if (!result || result.numItems === undefined) {
+    const result = await db.getFirstAsync<{ numItems: number }>(`
+      SELECT COUNT(i.id) AS numItems
+      FROM ${itemTable} AS i
+      INNER JOIN ${categoryTable} AS c ON c.id = i.category_id
+    `);
+    if (!result || typeof result.numItems !== "number") {
       throw new Error("Failed to get items count");
     }
     return result.numItems;
-  } catch (error) {
-    console.error(error);
-    throw Error("Failed to get items count");
+  } catch (error: any) {
+    console.error("Error counting items:", error);
+    throw Error("Failed to retrieve item count");
   }
 };
 

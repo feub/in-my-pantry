@@ -17,25 +17,48 @@ import CircleButton from "@/components/CircleButton";
 import ItemRow from "@/components/itemsList/ItemRow";
 import AddItemModal from "@/components/addItemModal/AddItemModal";
 import AddItemForm from "@/components/addItemModal/AddItemForm";
+import { SQLiteAnyDatabase } from "expo-sqlite/build/NativeStatement";
+
+const initializeDatabase = async (db: SQLiteAnyDatabase) => {
+  try {
+    await createTable(db);
+    const itemCount = await countItems(db);
+
+    if (itemCount === 0) {
+      console.log("Database empty, seeding initial data...");
+      await seedItems(db);
+    } else
+      console.log(
+        `Database already contains ${itemCount} items, skipping seed`,
+      );
+
+    return true;
+  } catch (error) {
+    console.error("Database initialization failed:", error);
+    throw error;
+  }
+};
 
 export default function Index() {
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [items, setItems] = useState<ItemWithCategory[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   const loadDataCallback = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+
     try {
       const db = await getDBConnection();
-      await createTable(db);
-      const numItems = await countItems(db);
-
-      if (numItems === 0) {
-        await seedItems(db);
-      }
-
+      await initializeDatabase(db);
       const storedItems = await getItems(db);
       setItems(storedItems);
     } catch (error) {
-      console.error(error);
+      console.error("Failed to load data:", error);
+      setError("Failed to load data. Please restart the app.");
+    } finally {
+      setIsLoading(false);
     }
   }, []);
 
@@ -105,6 +128,22 @@ export default function Index() {
     setIsModalVisible(false);
   };
 
+  if (isLoading) {
+    return (
+      <View style={styles.container}>
+        <Text>Loading...</Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.errorText}>{error}</Text>
+      </View>
+    );
+  }
+
   return (
     <>
       <View style={styles.container}>
@@ -140,6 +179,11 @@ const styles = StyleSheet.create({
     backgroundColor: "#c9efe0",
     alignItems: "center",
     paddingTop: 10,
+  },
+  errorText: {
+    color: "red",
+    textAlign: "center",
+    padding: 20,
   },
   entriesContainer: {
     width: "100%",
