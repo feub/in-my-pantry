@@ -1,19 +1,26 @@
 import { Text, View, StyleSheet } from "react-native";
 import { Image } from "react-native";
 import icon from "../../assets/images/icon.png";
+import MyText from "@/components/MyText";
 
 export default function About() {
   return (
     <View style={styles.container}>
       <Image source={icon} style={{ width: 100, height: 100 }} />
-      <Text style={{ marginBottom: 10, fontSize: 20, fontWeight: "bold" }}>
-        In my pantry
+      <Text
+        style={{
+          marginBottom: 10,
+          fontFamily: "Quicksand_700Bold",
+          fontSize: 24,
+        }}
+      >
+        About In my pantry
       </Text>
-      <Text style={styles.paragraph}>
+      <MyText style={styles.paragraph}>
         Never run out of your favorite foods again! This pantry management app
         simplifies inventory tracking, helping you organize your pantry, avoid
         duplicates, and reduce food waste.
-      </Text>
+      </MyText>
     </View>
   );
 }
@@ -32,6 +39,8 @@ const styles = StyleSheet.create({
     maxWidth: 600,
   },
   paragraph: {
+    fontSize: 18,
     paddingHorizontal: 15,
+    marginBottom: 10,
   },
 });

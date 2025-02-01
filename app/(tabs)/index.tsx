@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { FlatList, View, Text, StyleSheet } from "react-native";
+import { FlatList, View, StyleSheet } from "react-native";
 import {
   getDBConnection,
   createTable,
@@ -12,12 +12,19 @@ import {
   getCategories,
   AddItem,
 } from "@/db/db-service";
+import { SQLiteAnyDatabase } from "expo-sqlite/build/NativeStatement";
+import * as SplashScreen from "expo-splash-screen";
+import { useFonts } from "expo-font";
+import { VarelaRound_400Regular } from "@expo-google-fonts/varela-round";
+import { Quicksand_700Bold } from "@expo-google-fonts/quicksand";
 
 import CircleButton from "@/components/CircleButton";
 import ItemRow from "@/components/itemsList/ItemRow";
 import AddItemModal from "@/components/addItemModal/AddItemModal";
 import AddItemForm from "@/components/addItemModal/AddItemForm";
-import { SQLiteAnyDatabase } from "expo-sqlite/build/NativeStatement";
+import MyText from "@/components/MyText";
+
+SplashScreen.preventAutoHideAsync(); // Prevent splash screen from hiding
 
 const initializeDatabase = async (db: SQLiteAnyDatabase) => {
   try {
@@ -25,12 +32,8 @@ const initializeDatabase = async (db: SQLiteAnyDatabase) => {
     const itemCount = await countItems(db);
 
     if (itemCount === 0) {
-      console.log("Database empty, seeding initial data...");
       await seedItems(db);
-    } else
-      console.log(
-        `Database already contains ${itemCount} items, skipping seed`,
-      );
+    }
 
     return true;
   } catch (error) {
@@ -44,6 +47,20 @@ export default function Index() {
   const [items, setItems] = useState<ItemWithCategory[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+
+  let [fontsLoaded] = useFonts({
+    VarelaRound_400Regular,
+    Quicksand_700Bold,
+  });
+
+  useEffect(() => {
+    async function prepare() {
+      if (fontsLoaded) {
+        await SplashScreen.hideAsync();
+      }
+    }
+    prepare();
+  }, [fontsLoaded]);
 
   const loadDataCallback = useCallback(async () => {
     setIsLoading(true);
@@ -128,10 +145,14 @@ export default function Index() {
     setIsModalVisible(false);
   };
 
+  if (!fontsLoaded) {
+    return null;
+  }
+
   if (isLoading) {
     return (
       <View style={styles.container}>
-        <Text>Loading...</Text>
+        <MyText>Loading...</MyText>
       </View>
     );
   }
@@ -139,7 +160,7 @@ export default function Index() {
   if (error) {
     return (
       <View style={styles.container}>
-        <Text style={styles.errorText}>{error}</Text>
+        <MyText style={styles.errorText}>{error}</MyText>
       </View>
     );
   }
@@ -147,7 +168,9 @@ export default function Index() {
   return (
     <>
       <View style={styles.container}>
-        <Text>{items && items.length} items</Text>
+        <MyText style={{ fontFamily: "VarelaRound_400Regular" }}>
+          {items && items.length} items
+        </MyText>
         <FlatList<ItemWithCategory>
           data={items}
           renderItem={({ item }) => (
@@ -175,6 +198,7 @@ export default function Index() {
 
 const styles = StyleSheet.create({
   container: {
+    fontFamily: "VarelaRound_400Regular",
     flex: 1,
     backgroundColor: "#c9efe0",
     alignItems: "center",

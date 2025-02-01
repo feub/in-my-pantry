@@ -14,6 +14,12 @@ export default function TabLayout() {
         tabBarStyle: {
           backgroundColor: "#f9ead1",
         },
+        headerTitleStyle: {
+          fontFamily: "Quicksand_700Bold",
+        },
+        headerTitleContainerStyle: {
+          width: 200,
+        },
       }}
     >
       <Tabs.Screen
@@ -27,6 +33,9 @@ export default function TabLayout() {
               size={24}
             />
           ),
+          headerTitleStyle: {
+            fontFamily: "Quicksand_700Bold",
+          },
         }}
       />
       <Tabs.Screen
