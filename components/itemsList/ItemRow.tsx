@@ -1,8 +1,9 @@
 import React from "react";
 import { Text, View, StyleSheet } from "react-native";
+import { ItemWithCategory } from "@/db/db-service";
 import ItemRowButton from "./ItemRowButton";
 import ItemRowButtonDel from "./ItemRowButtonDel";
-import { ItemWithCategory } from "@/db/db-service";
+import MyText from "../MyText";
 
 export default function ItemRow({
   item,
@@ -28,15 +29,15 @@ export default function ItemRow({
     <>
       <View style={[styles.entryRow, { backgroundColor: rowBgColor }]}>
         <View style={styles.entryRowLabel}>
-          <Text style={styles.entryRowItem}>{item.name}</Text>
-          <Text style={{ fontSize: 10 }}>{item.category}</Text>
+          <MyText style={styles.entryRowItem}>{item.name}</MyText>
+          <MyText style={{ fontSize: 10 }}>{item.category}</MyText>
         </View>
         <View style={styles.entryRowActions}>
           <ItemRowButtonDel onDelete={() => handleDelete(item.id)} />
           <ItemRowButton mode="minus" onPress={() => onPress(-1)} />
-          <Text style={[styles.entryRowQty, { color: qtyColor }]}>
+          <MyText style={[styles.entryRowQty, { color: qtyColor }]}>
             {item.qty}
-          </Text>
+          </MyText>
           <ItemRowButton mode="plus" onPress={() => onPress(+1)} />
         </View>
       </View>
@@ -72,10 +73,12 @@ const styles = StyleSheet.create({
   },
   entryRowActions: {
     flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-end",
   },
   entryRowQty: {
+    fontFamily: "Quicksand_700Bold",
     fontSize: 20,
-    fontWeight: "bold",
     color: "gray",
   },
 });
