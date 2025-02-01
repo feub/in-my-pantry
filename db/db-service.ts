@@ -142,28 +142,10 @@ export const seedItems = async (db: SQLiteDatabase) => {
         );
       }
     });
-
-    console.log("Seeding completed successfully");
   } catch (error) {
     console.error("Error seeding database:", error);
     throw error;
   }
-  // return await db.execAsync(`
-  //   INSERT INTO ${categoryTable} (name) VALUES ('Uncategorized');
-  //   INSERT INTO ${categoryTable} (name) VALUES ('Fruits');
-  //   INSERT INTO ${categoryTable} (name) VALUES ('Vegetables');
-  //   INSERT INTO ${categoryTable} (name) VALUES ('Legumes');
-  //   INSERT INTO ${categoryTable} (name) VALUES ('Cookies');
-  //   INSERT INTO ${categoryTable} (name) VALUES ('Oils & Butters');
-  //   INSERT INTO ${categoryTable} (name) VALUES ('Sweets');
-  //   INSERT INTO ${categoryTable} (name) VALUES ('Vegan Must Have');
-  //   INSERT INTO ${itemTable} (category_id, name, qty, qtyAlert) VALUES (1, '◻️ Tofu', 2, 1);
-  //   INSERT INTO ${itemTable} (category_id, name, qty, qtyAlert) VALUES (4, '🫘 Chickpeas', 2, 1);
-  //   INSERT INTO ${itemTable} (category_id, name, qty, qtyAlert) VALUES (7, '🍓 Strawberry Jam', 1, 0);
-  //   INSERT INTO ${itemTable} (category_id, name, qty, qtyAlert) VALUES (6, '🧈 Margarine', 2, 1);
-  //   INSERT INTO ${itemTable} (category_id, name, qty, qtyAlert) VALUES (2, '🍌 Bananas', 7, 3);
-  //   INSERT INTO ${itemTable} (category_id, name, qty, qtyAlert) VALUES (3, '🥕 Carrots', 7, 3);
-  // `);
 };
 
 export const countItems = async (db: SQLiteDatabase): Promise<number> => {
@@ -193,7 +175,6 @@ export const getItems = async (
       LEFT JOIN ${categoryTable} c ON c.id = i.category_id
     `);
 
-    console.log("Retrieved items from database:", results);
     return results;
   } catch (error) {
     console.error("Error in getItems:", error);
@@ -202,15 +183,12 @@ export const getItems = async (
 };
 
 export const addNewItem = async (db: SQLiteDatabase, item: AddItem) => {
-  console.log("Adding item to database:", item);
-
   try {
     const result = await db.runAsync(
       `INSERT INTO ${itemTable} (category_id, name, qty, qtyAlert) VALUES (?, ?, ?, ?)`,
       [item.category_id, item.name, item.qty, item.qtyAlert],
     );
 
-    console.log("Database operation result:", result);
     return result;
   } catch (error) {
     console.error("Database error in addNewItem:", error);
