@@ -14,11 +14,14 @@ export default function ItemRow({
   handleDelete: (id: number) => void;
 }) {
   let rowBgColor = "#ffffff";
+  let qtyColor = "gray";
 
   if (item.qty < item.qtyAlert) {
     rowBgColor = "#fcbdbd";
+    qtyColor = "red";
   } else if (item.qty === item.qtyAlert) {
     rowBgColor = "#fcdcb3";
+    qtyColor = "orange";
   }
 
   return (
@@ -31,7 +34,9 @@ export default function ItemRow({
         <View style={styles.entryRowActions}>
           <ItemRowButtonDel onDelete={() => handleDelete(item.id)} />
           <ItemRowButton mode="minus" onPress={() => onPress(-1)} />
-          <Text style={styles.entryRowQty}>{item.qty}</Text>
+          <Text style={[styles.entryRowQty, { color: qtyColor }]}>
+            {item.qty}
+          </Text>
           <ItemRowButton mode="plus" onPress={() => onPress(+1)} />
         </View>
       </View>
