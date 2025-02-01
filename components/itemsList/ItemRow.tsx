@@ -13,9 +13,17 @@ export default function ItemRow({
   onPress: (value: number) => void;
   handleDelete: (id: number) => void;
 }) {
+  let rowBgColor = "#ffffff";
+
+  if (item.qty < item.qtyAlert) {
+    rowBgColor = "#fcbdbd";
+  } else if (item.qty === item.qtyAlert) {
+    rowBgColor = "#fcdcb3";
+  }
+
   return (
     <>
-      <View style={styles.entryRow}>
+      <View style={[styles.entryRow, { backgroundColor: rowBgColor }]}>
         <View style={styles.entryRowLabel}>
           <Text style={styles.entryRowItem}>{item.name}</Text>
           <Text style={{ fontSize: 10 }}>{item.category}</Text>
